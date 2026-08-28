@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="食べに行きたい店">
+<meta name="theme-color" content="#F3EDE1">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23B23B2E'/%3E%3Ctext x='50' y='64' font-size='48' text-anchor='middle' fill='white' font-family='sans-serif'%3E食%3C/text%3E%3C/svg%3E">
+<title>食べに行きたいお店ノート</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+
+  :root{
+    --paper:#F3EDE1;
+    --ink:#2B2621;
+    --ink-soft:#6B6156;
+    --stamp:#B23B2E;
+    --stamp-soft:#E7CFC4;
+    --line:#D8CBB5;
+    --card:#FBF7EE;
+    --gold:#A98A3E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,38,33,0.05) 1px, transparent 0);
+    background-size:18px 18px;
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    padding-bottom:60px;
+  }
+
+  header{
+    padding:28px 20px 18px;
+    border-bottom:3px double var(--ink);
+    position:relative;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.25em;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0;
+    letter-spacing:0.04em;
+  }
+  .stamp{
+    position:absolute;
+    top:22px;
+    right:20px;
+    width:56px;
+    height:56px;
+    border:2.5px solid var(--stamp);
+    border-radius:6px;
+    color:var(--stamp);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:13px;
+    line-height:1.1;
+    text-align:center;
+    transform:rotate(-6deg);
+    opacity:0.85;
+  }
+
+  .toolbar{
+    padding:16px 20px 0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .row2{display:flex; gap:8px;}
+  input[type=text], select{
+    width:100%;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:var(--card);
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+  }
+  select{flex:1;}
+  .count{
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:6px 20px 0;
+  }
+
+  .list{
+    padding:14px 16px 0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    position:relative;
+    box-shadow:0 1px 0 rgba(43,38,33,0.04);
+  }
+  .card.visited{
+    opacity:0.62;
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .name{
+    font-family:'Shippori Mincho', serif;
+    font-weight:700;
+    font-size:17px;
+    line-height:1.4;
+  }
+  .tags{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+  .tag{
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:20px;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    white-space:nowrap;
+  }
+  .tag.area{
+    border-color:var(--stamp);
+    color:var(--stamp);
+  }
+  .memo{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    line-height:1.5;
+    white-space:pre-wrap;
+  }
+  .meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    line-height:1.6;
+  }
+  .meta span{display:block;}
+  .actions{
+    display:flex;
+    gap:14px;
+    margin-top:10px;
+    align-items:center;
+  }
+  .actions a, .actions button{
+    font-size:12.5px;
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    padding:0;
+    cursor:pointer;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .actions a.map{color:var(--stamp); font-weight:600;}
+  .visited-check{
+    font-size:12px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .visited-check input{accent-color:var(--stamp);}
+
+  .fab{
+    position:fixed;
+    right:20px;
+    bottom:24px;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:var(--stamp);
+    color:#fff;
+    font-size:28px;
+    border:none;
+    box-shadow:0 4px 14px rgba(178,59,46,0.4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+
+  .sheet-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(43,38,33,0.5);
+    z-index:10;
+    align-items:flex-end;
+  }
+  .sheet-backdrop.open{display:flex;}
+  .sheet{
+    background:var(--paper);
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    border-radius:18px 18px 0 0;
+    padding:20px;
+    border-top:3px double var(--ink);
+  }
+  .sheet h2{
+    font-family:'Shippori Mincho', serif;
+    font-size:18px;
+    margin:0 0 14px;
+  }
+  .field{margin-bottom:12px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .field input, .field textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    background:var(--card);
+    font-family:inherit;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .field textarea{min-height:64px; resize:vertical;}
+  .sheet-actions{
+    display:flex;
+    gap:10px;
+    margin-top:16px;
+  }
+  .btn{
+    flex:1;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn.save{background:var(--stamp); color:#fff;}
+  .btn.cancel{background:transparent; border:1.5px solid var(--line); color:var(--ink-soft);}
+  .btn.delete{background:transparent; color:var(--stamp); border:1.5px solid var(--stamp-soft); flex:0 0 auto; padding:12px 16px;}
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  .loading{
+    text-align:center;
+    padding:40px;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">MY OSAKA GOURMET NOTE</div>
+  <h1>食べに行きたいお店</h1>
+  <div class="stamp">保存<br>控</div>
+</header>
+
+<div class="toolbar">
+  <input type="text" id="searchInput" placeholder="店名・メモで検索">
+  <div class="row2">
+    <select id="areaFilter"></select>
+    <select id="visitFilter">
+      <option value="all">すべて</option>
+      <option value="not">未訪問のみ</option>
+      <option value="visited">訪問済のみ</option>
+    </select>
+  </div>
+</div>
+<div class="count" id="countLabel"></div>
+
+<div class="list" id="list">
+  <div class="loading">読み込み中…</div>
+</div>
+
+<button class="fab" id="addBtn">＋</button>
+
+<div class="sheet-backdrop" id="backdrop">
+  <div class="sheet">
+    <h2 id="sheetTitle">お店を追加</h2>
+    <div class="field">
+      <label>店名(分かれば)</label>
+      <input type="text" id="f_name" placeholder="例：麵屋◯◯">
+    </div>
+    <div class="field">
+      <label>エリア</label>
+      <input type="text" id="f_area" placeholder="例：京橋、心斎橋">
+    </div>
+    <div class="field">
+      <label>ジャンル</label>
+      <input type="text" id="f_genre" placeholder="例：ラーメン、タイ料理">
+    </div>
+    <div class="field">
+      <label>住所</label>
+      <input type="text" id="f_address" placeholder="分かれば正確な住所を">
+    </div>
+    <div class="field">
+      <label>営業時間・定休日</label>
+      <input type="text" id="f_hours" placeholder="例：11:00〜22:00 水曜定休">
+    </div>
+    <div class="field">
+      <label>電話番号</label>
+      <input type="text" id="f_phone" placeholder="例：06-1234-5678">
+    </div>
+    <div class="field">
+      <label>メモ</label>
+      <textarea id="f_memo" placeholder="投稿の見出しや気になった理由など"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn delete" id="deleteBtn" style="display:none;">削除</button>
+      <button class="btn cancel" id="cancelBtn">キャンセル</button>
+      <button class="btn save" id="saveBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'shops-list';
+let shops = [];
+let editingId = null;
+
+const seedData = [
+  {name:"", area:"大阪市内", genre:"定食・カウンター", memo:"「大阪でここだけ」— カウンター調理の店。", visited:false},
+  {name:"", area:"本町", genre:"中華・炒飯", memo:"「台湾No.1炒飯」", visited:false},
+  {name:"", area:"大阪市内", genre:"タイ料理", memo:"「タイよりタイ」ガパオライス", visited:false},
+  {name:"", area:"京橋", genre:"点心・餃子", memo:"「サラリーマンの味方」小籠包っぽい点心", visited:false},
+  {name:"", area:"桜川", genre:"定食", memo:"「おかわり無料」肉盛りコスパ定食", visited:false},
+  {name:"", area:"心斎橋", genre:"タイ料理", memo:"「まるで本場タイ料理店」カオマンガイ系", visited:false},
+  {name:"", area:"北浜", genre:"そうめん", memo:"奈良の大人気そうめん専門店", visited:false},
+  {name:"", area:"大阪市内", genre:"ラーメン", memo:"大阪の貝出汁ラーメン専門店", visited:false},
+  {name:"", area:"大阪市内", genre:"貝料理・居酒屋", memo:"「日本一の貝酒場」貝好き必見", visited:false},
+  {name:"", area:"大阪市内", genre:"肉料理", memo:"「絶対に行くべき」肉の盛り合わせ", visited:false},
+  {name:"", area:"大阪市内", genre:"メキシカン", memo:"タコス。ビールやテキーラと相性抜群", visited:false},
+  {name:"", area:"日本橋", genre:"ラーメン", memo:"「冷やにぼ清湯」", visited:false},
+  {name:"", area:"中津", genre:"ネパール料理", memo:"本格ネパール専門店", visited:false},
+  {name:"", area:"大阪市内", genre:"未分類", memo:"「正直、想像以上に」スプーンで食べる料理", visited:false},
+  {name:"", area:"堀江", genre:"ブリトー・メキシカン", memo:"「中毒者続出」飲めるブリトー", visited:false},
+  {name:"", area:"海老江", genre:"イタリアン", memo:"「濃厚なうまみ」元イタリアンシェフによる", visited:false},
+  {name:"", area:"大阪市内", genre:"焼肉・牛タン", memo:"「大阪一の牛タン」パンパンすぎてやばい", visited:false},
+  {name:"", area:"大阪市内", genre:"韓国料理", memo:"「スンドゥブから生まれた」スープ料理", visited:false},
+];
+
+const batch2Data = [
+  {name:"マルフク", area:"西成区", genre:"立ち飲み・モーニング", address:"大阪府大阪市西成区太子1-6-16", hours:"8:00〜21:00 水曜定休", phone:"", memo:"西成モーニングハシゴの1軒目。ビールセットあり"},
+  {name:"成り屋 本店", area:"西成区", genre:"立ち飲み・モーニング", address:"大阪府大阪市西成区山王1丁目14-10", hours:"9:00〜23:00", phone:"", memo:"西成モーニングハシゴの2軒目"},
+  {name:"スタンド ハとり本店", area:"西成区", genre:"立ち飲み・モーニング", address:"大阪府大阪市西成区太子1丁目6-10", hours:"9:00〜21:00", phone:"", memo:"西成モーニングハシゴの3軒目"},
+  {name:"花の山", area:"西成区", genre:"立ち飲み・モーニング", address:"大阪府大阪市西成区萩之茶屋2丁目3", hours:"9:30〜19:00 水曜定休", phone:"", memo:"西成モーニングハシゴの4軒目。4軒で2人3950円"},
+  {name:"ロイスの店", area:"北区西天満", genre:"オムライス", address:"〒530-0047 大阪府大阪市北区西天満3丁目8-17", hours:"", phone:"", memo:"大阪で1番美味いオムライスと話題"},
+  {name:"K's Bulls-Eye", area:"梅田", genre:"ラーメン・カフェバー", address:"", hours:"", phone:"", memo:"蟹ポタ白湯ラーメン(味玉・バラのりトッピング)"},
+  {name:"松乃井食堂", area:"北区天神橋", genre:"ビストロ・ワイン", address:"大阪府大阪市北区天神橋5-7-12 天五共栄ビル1F", hours:"月火金17:00〜22:00／土日祝13:00〜22:00 定休日水木", phone:"06-6335-9911", memo:"青海苔クリームパスタ、黒トリュフリゾットが名物。予算¥3,000〜3,999"},
+  {name:"夜の一粒 梅田店", area:"北区堂山町", genre:"居酒屋・おにぎり食べ放題", address:"大阪府大阪市北区堂山町7-18 K.BLD.堂山 B1F", hours:"17:00〜5:00", phone:"", memo:"御膳注文でおにぎり食べ放題。牡蠣のおでん等"},
+  {name:"炉端と釜飯 龍", area:"梅田(茶屋町)", genre:"釜飯・ランチ", address:"〒530-0013 大阪府大阪市北区茶屋町6-15 永砂ビル5階", hours:"", phone:"", memo:"梅田駅徒歩3分。爆速1000円ランチ"},
+  {name:"ミリネヤンコプチャン大阪福島店", area:"福島区", genre:"韓国風ホルモン焼肉", address:"大阪府大阪市福島区福島5-12-7", hours:"16:00〜23:00", phone:"", memo:"東京の人気店が大阪初出店。肉は1.5〜2人前量"},
+  {name:"出汁 小林", area:"梅田(エキマルシェ)", genre:"定食(だし巻き卵)", address:"大阪府大阪市北区梅田3-1-1 エキマルシェ大阪R21区画", hours:"11:00〜23:00 定休日なし", phone:"06-6476-8304", memo:"行列の800円だし巻き卵定食。羽釜ご飯おかわり無料"},
+  {name:"生ニラレバ炒と朝引き鶏タタキ屋", area:"北区天神橋", genre:"立ち飲み・鳥刺し", address:"大阪市北区天神橋4-7-27", hours:"12:00〜22:00", phone:"", memo:"朝引き鶏の鳥刺し、白きも刺し77円、串カツ3本100円"},
+  {name:"麺屋 電龍", area:"淀川区(神崎川)", genre:"ラーメン・つけ麺", address:"", hours:"", phone:"", memo:"鶏白湯つけ麺こってり1150円。麺大盛り無料"},
+  {name:"だしと小麦の可能性", area:"中央区日本橋", genre:"ラーメン", address:"大阪府大阪市中央区日本橋2-5-8", hours:"", phone:"", memo:"蟹ミソラーメン"},
+  {name:"海鮮物語", area:"中央区道頓堀", genre:"海老しゃぶしゃぶ", address:"大阪府大阪市中央区道頓堀1-6-12 ニコービル2F", hours:"月火水木日17:00〜02:00／金土17:00〜03:00", phone:"050-5594-4051", memo:"元祖・海老しゃぶしゃぶ。麻辣海老しゃぶしゃぶが新登場"},
+  {name:"サーモンLabo", area:"北区堂山町", genre:"サーモン専門店", address:"大阪府大阪市北区堂山町8-12 2F", hours:"12:00〜23:00 定休日なし", phone:"", memo:"大阪梅田駅から413m。サーモンボナーラが人気"},
+  {name:"はんまだん", area:"浪速区(新今宮)", genre:"立ち飲み・ホルモン鉄板", address:"大阪市浪速区恵美須西3-2-12", hours:"15:00〜2:00 火曜定休", phone:"06-7173-6624", memo:"新今宮駅すぐ、通天閣が見える。名物ホルモン300円"},
+  {name:"juuu.(ジュウ)", area:"北区中津", genre:"肉料理", address:"大阪府大阪市北区中津3-23-18 1F", hours:"火〜金18:00〜23:00／土日祝17:00〜23:00 定休日月曜", phone:"", memo:"肉汁じゃがバーグ(飲める肉汁ハンバーグ)、最強系カルビ焼肉"},
+  {name:"ラー好きイカ墨チャン麺(監修店)", area:"寝屋川市", genre:"ラーメン(チャン麺)", address:"大阪府寝屋川市郡元町1-1", hours:"平日11:30〜13:30/18:00〜23:30、土日11:30〜14:00/18:00〜23:30 定休日水曜", phone:"072-802-0141", memo:"ラーメン好きですねん監修。イカ墨チャン麺、駐車場あり。香里園駅"},
+  {name:"麺屋煮干組。", area:"未確認", genre:"ラーメン(煮干)", address:"", hours:"", phone:"", memo:"1周年限定セメント煮干麺。チェダーチーズ・卵黄・黒胡椒、ダイブ飯付き"},
+  {name:"中トロと豚足(店名要確認)", area:"北区(天満)", genre:"立ち飲み", address:"大阪府大阪市北区錦町3-12 アウロラビル B1F", hours:"12:00〜22:00 定休日水曜 予約不可", phone:"090-9993-8995", memo:"珍しいメニュー(牛の耳=福耳など)。予算1,000〜2,000円"},
+  {name:"金麺と金蕎麦(店名要確認)", area:"十三", genre:"ラーメン・蕎麦", address:"", hours:"", phone:"", memo:"特濃追い煮干し蕎麦、黒酢の和え玉がおすすめの組み合わせ"},
+  {name:"仔牛", area:"北区堂島(北新地)", genre:"ステーキランチ", address:"〒530-0003 大阪府大阪市北区堂島1丁目5-37 堂島地田ビル・III 1F", hours:"11:00〜14:00、17:00〜22:00 定休日土日", phone:"", memo:"炭火ステーキランチ。卵・キムチ・味噌汁食べ放題。予算1,000〜2,000円"},
+];
+
+const batch3Data = [
+  {name:"イプセ", area:"北区天神橋(扇町)", genre:"韓国料理(炭火サムギョプサル)", address:"大阪府大阪市北区天神橋4-7-29 2F", hours:"11:00〜22:00(金土日23:00) ランチ〜15:00 定休日なし 予約可", phone:"", memo:"ミナリサムギョプサルとカンジャンケジャン(要3日前予約)が名物"},
+  {name:"にんにく鶏焼肉サン 北新地店", area:"北区曽根崎新地(北新地)", genre:"鶏焼肉・鍋", address:"大阪市北区曽根崎新地1-9-1 プランドールビル B1F", hours:"18:00〜4:00 定休日なし", phone:"", memo:"鉄板と鍋が一体の焼き台。奈良大和肉鶏使用。予算〜4000円。北新地駅徒歩3分"},
+  {name:"塩そば 時空 大阪", area:"中央区東心斎橋", genre:"ラーメン(塩)", address:"大阪府大阪市中央区東心斎橋1-9-19 ミトオリアートビル103号室", hours:"11:00〜15:00/17:00〜21:00(店舗・曜日で変動) 不定休", phone:"", memo:"広島の名店に感動し開業。12時間以上仕込みの魚介塩スープ。長堀橋・心斎橋駅近く"},
+  {name:"ダイヤモンドビリヤニ", area:"北区中津", genre:"ビリヤニ専門店", address:"〒531-0071 大阪府大阪市北区中津3丁目17-2", hours:"ランチ11:00〜15:00／ディナー17:00〜22:30 定休日なし", phone:"06-6225-7181", memo:"3年連続百名店。注文後に炊く熱々鉄釜ビリヤニ。開店30分前から並ぶ"},
+  {name:"小林商店", area:"北区天満", genre:"豚足・ホルモン", address:"大阪市北区池田町6-1", hours:"16:00〜23:00／土日祝12:00〜23:00", phone:"06-6352-3393", memo:"天満駅徒歩3分。豚足臭みなしでぷるぷる。スープ無料、豚足ラーメンも人気"},
+  {name:"YAMACHAN", area:"福島区海老江", genre:"つけ麺・まぜそば", address:"大阪市福島区海老江2-2-12", hours:"11:30〜15:00／18:00〜23:00", phone:"", memo:"宇和島鯛めし風冷やしつけ麺、冷製鶏ユッケまぜそばが人気の冷やしラーメン店"},
+  {name:"貝と地鶏だしのらぁ麺 ちょろ", area:"中央区谷町四丁目", genre:"ラーメン(貝だし)", address:"大阪府大阪市中央区内本町2-3-8 ダイアパレスビル213", hours:"11:00〜15:00(LO14:40)／17:30〜22:00(LO21:30) 無休", phone:"050-5869-2202", memo:"貝だしと地鶏のダブルスープ。夏限定の冷やし牡蠣らぁ麺が人気"},
+  {name:"山賊", area:"天王寺区(鶴橋)", genre:"韓国料理(サムギョプサル)", address:"大阪市天王寺区舟橋町19-5", hours:"11:00〜23:30", phone:"06-6191-9980", memo:"鶴橋駅からすぐ、スタッフ全員韓国の方。プレミアムサムギョプサルコースでおかず15種類ほど"},
+  {name:"タコスと肴と酒 タコフィニ", area:"北区浮田(天満)", genre:"タコス・バル", address:"大阪府大阪市北区浮田1-1-22", hours:"平日18:00〜0:00(LO23:00)／土日祝13:00〜0:00(LO23:00) 不定休", phone:"", memo:"生地も全て自家製の飲めるタコス。天神橋筋六丁目駅徒歩1分"},
+  {name:"鶴橋の焼肉店(店名要確認)", area:"鶴橋", genre:"焼肉", address:"", hours:"", phone:"", memo:"鶴橋にできた肉質が良い焼肉屋。PR投稿より"},
+  {name:"天満産直市場", area:"天満", genre:"海鮮酒場", address:"", hours:"", phone:"", memo:"中トロユッケ丼、サーモンいくら丼が新登場。天満駅から徒歩すぐ"},
+  {name:"韓国料理 Taon-タオン-", area:"東大阪市花園東町", genre:"韓国料理", address:"東大阪市花園東町2丁目6-29", hours:"17:00〜22:00 定休日月火水", phone:"072-947-9776", memo:"名物カンジャンケジャン(前日予約必須)、夏限定フェケジャンが人気。東花園駅徒歩5分"},
+  {name:"ぺろん本店", area:"北区梅田", genre:"パスタ専門店", address:"〒530-0001 大阪府大阪市北区梅田1丁目11-4 大阪駅前第4ビル 地下1階", hours:"月〜土11:00〜21:00／日11:00〜15:00 定休日なし", phone:"", memo:"並600円からのコスパ最強ペペロンチーノ。イカ墨ペペロンチーノがおすすめ"},
+  {name:"麺屋 煮干組。", area:"福島区海老江", genre:"ラーメン(煮干)", address:"大阪府大阪市福島区海老江5-1-9 寿ハイツ1F", hours:"月火水金土日祝 11:00〜15:00(LO14:30)／18:00〜22:00(LO21:30) 木曜定休", phone:"", memo:"3種の煮干+3種の節+11種野菜の無化調スープ。以前登録した「麺屋煮干組。」と同じ店の可能性あり、重複していたら統合してください"},
+  {name:"Ecle. osaka(エクレオオサカ)", area:"西区南堀江", genre:"ブリトー", address:"大阪府大阪市西区南堀江3-13-11", hours:"10:00〜21:00 無休", phone:"", memo:"大阪初上陸の飲めるブリトー、特製ソースにダイブが必須。以前登録した堀江のブリトー店と同じ可能性あり、重複していたら統合してください"},
+  {name:"大阪 かに銀 難波店", area:"中央区難波", genre:"蟹食べ放題", address:"大阪府大阪市中央区難波3-4-16 ECS第32ビル7F-B", hours:"12:00〜23:00 無休", phone:"", memo:"たらば蟹・本ずわい・紅ずわい等77品100分食べ放題18,700円。難波駅からすぐ"},
+  {name:"百薫香辛食堂", area:"中央区南本町", genre:"スパイスカレー", address:"大阪市中央区南本町3-5-5 プラスビル2F", hours:"月木金土日11:30〜14:30/18:00〜21:00、火11:30〜14:30 定休日水曜", phone:"", memo:"食べログ カレーWEST百名店。本町駅7番出口徒歩1分。夜はスパイス料理とお酒も"},
+];
+
+const batch4Data = [
+  {name:"豚足のかどや", area:"浪速区難波", genre:"豚足・老舗酒場", address:"大阪府大阪市浪速区難波中1-4-15 南松竹マンション", hours:"11:00〜22:00(売切終了あり) 定休日火曜", phone:"", memo:"1950年創業。注文後わずか9秒で提供される名物豚足。なんば駅徒歩3分"},
+  {name:"ガンジーカレー", area:"北区本庄東", genre:"インドカレー", address:"大阪府大阪市北区本庄東1-10-21 サニーハウス1F", hours:"月〜土11:00〜14:00 定休日日曜", phone:"", memo:"キーマ×フィッシュの2種盛りが名物。天神橋筋六丁目駅徒歩5分"},
+  {name:"麺や佑", area:"本町", genre:"ラーメン", address:"", hours:"月火水木金土10:00〜15:00/17:00〜21:30、日10:00〜15:00/17:00〜21:00", phone:"", memo:"鶏豚+魚介出汁の濃厚スープ。らーめん高菜ご飯ランチ"},
+  {name:"和Dinning わだち", area:"肥後橋", genre:"定食(食べ放題付)", address:"", hours:"", phone:"", memo:"肥後橋駅徒歩3分。定食頼むとキーマカレー・白ごはん・味噌汁が食べ放題。肉巻き定食1000円"},
+  {name:"Nepal Tea House Kathmandu", area:"北区豊崎(中津)", genre:"ネパール料理", address:"大阪市北区豊崎7-3-8", hours:"11:00〜20:30", phone:"", memo:"ネパール人オーナー。ダルバート、パニプリが名物。中津駅徒歩8分"},
+  {name:"麺通処 日加月", area:"中央区高津(日本橋)", genre:"ラーメン(冷やし煮干)", address:"大阪府大阪市中央区高津2-1-25 東道頓堀双葉プラザ1F", hours:"火〜日11:00〜14:30 定休日月曜", phone:"", memo:"冷にぼ清湯が名物。全粒粉入りの珍しい色の麺。日本橋駅徒歩5分"},
+  {name:"メキシコ料理専門店(天神橋)", area:"北区天神橋", genre:"タコス", address:"〒530-0041 大阪府大阪市北区天神橋1丁目20-3 白梅ビル1階", hours:"11:30〜14:30／17:00〜22:00", phone:"", memo:"本場メキシコの人気ビリアタコス。店名要確認"},
+  {name:"赤から麺", area:"北区角田町(梅田)", genre:"ラーメン(韓国風スンドゥブ系)", address:"大阪市北区角田町6-9", hours:"11:30〜14:30(LO14:00)", phone:"", memo:"2026年5月1日オープン、ランチ限定先着60名。牛ベーススープにタデギ、辛さLv.1〜5選択可。梅田駅徒歩3分"},
+  {name:"焼肉らんど 玉造店", area:"玉造", genre:"焼肉", address:"", hours:"", phone:"", memo:"八尾で人気の焼肉が大阪市内に。数量限定牛タン御膳990円(現金のみ)。玉造駅徒歩3分"},
+  {name:"貝バル BACCANALE 福島店", area:"福島区福島", genre:"貝バル", address:"大阪府大阪市福島区福島5-10-14 2階", hours:"", phone:"", memo:"大粒ハマグリしゃぶしゃぶ、特大なつぶ貝が名物。JR福島駅・新福島駅徒歩2〜3分"},
+  {name:"Ramen ThreE", area:"西区江戸堀(肥後橋)", genre:"ラーメン(貝出汁)", address:"大阪府大阪市西区江戸堀1-4-23", hours:"11:00〜15:00／17:30〜23:00、土祝11:00〜15:00 定休日日曜", phone:"", memo:"東京下北沢「貝麺みかわ」直伝の貝出汁+牛スープ。肥後橋駅徒歩1分"},
+  {name:"てのべたかだや北浜茶寮", area:"中央区北浜", genre:"そうめん専門店", address:"大阪市中央区北浜2-1-2 北浜ビル1F", hours:"11:00〜21:00", phone:"", memo:"創業92年「マル勝髙田商店」。三輪素麺の技×オリーブオイルの新感覚そうめん約20種。北浜駅徒歩1分"},
+  {name:"羽柴家 肉皿", area:"北区天神橋(天満)", genre:"肉料理・焼肉", address:"大阪府大阪市北区天神橋5-6-23 一松食品センター 天五横丁", hours:"月〜金17:00〜24:00／土日祝15:00〜24:00 不定休", phone:"", memo:"カウンター8席。パンパンの牛タン2640円、特選和牛シャトーブリアン前日予約で半額。天満駅・天神橋筋六丁目駅徒歩5分"},
+  {name:"龍多風亜(RYUTERHUA)", area:"中央区心斎橋", genre:"タイ料理", address:"大阪市中央区心斎橋筋2-2-32", hours:"", phone:"", memo:"店員ほとんどタイ人。カオマンガイなど本場料理、辛さ選択可。心斎橋駅徒歩6分"},
+  {name:"大旦那 扇町店", area:"北区天神橋(扇町)", genre:"定食(食べ放題付)", address:"大阪府大阪市北区天神橋4-1-2 松一ビル1F", hours:"火〜日祝11:05〜14:30(LO14:00)／17:00〜23:00(LO22:00) 定休日月曜", phone:"06-6881-2827", memo:"ご飯おかわり無料+生卵食べ放題。10時間煮込み肉すいが人気、+320円で牛めしに変更可"},
+];
+
+const batch5Data = [
+  {name:"民生炒飯 大阪店", area:"中央区備後町(本町)", genre:"台湾料理(炒飯)", address:"大阪府大阪市中央区備後町3-3-1 西島ビル B1F", hours:"月〜金11:30〜14:30(LO14:00)／18:00〜22:30(LO22:00) 定休日土日祝", phone:"06-6732-8810", memo:"台湾No.1炒飯として名高い、日本に横浜と大阪の2店舗のみ。以前登録した「台湾No.1炒飯」(本町)と同じ店の可能性が高いです、重複していたら統合してください"},
+  {name:"酒ト場", area:"都島区東野田町(京橋)", genre:"居酒屋(点心・餃子)", address:"大阪府大阪市都島区東野田町3-4-15 天豊ビル 2F", hours:"17:00〜0:00 LO料理23:00 ドリンク23:30 定休日なし", phone:"050-5868-8953", memo:"京橋駅徒歩2分。全席加熱式タバコのみ可。以前登録した「サラリーマンの味方」(京橋・点心)と同じ店の可能性があります、重複していたら統合してください"},
+];
+
+const batch6Data = [
+  {name:"まるゑ 天満店", area:"北区天神橋(天満)", genre:"鶏焼肉専門店", address:"大阪市北区天神橋5-2-2", hours:"17:00〜23:30", phone:"06-7777-0299", memo:"朝引き地鶏の鶏焼肉専門店。特選生肝770円、鳥刺しや白子も。天満飲みの人気店"},
+  {name:"イタリア食堂Anello", area:"北区池田町(天満)", genre:"イタリアン・パスタ", address:"大阪市北区池田町14-12 シャトー菅北", hours:"定休日日曜", phone:"", memo:"開店前から並ぶ食べログ百名店。予算3,000〜4,000円。天神橋筋六丁目駅・天満駅徒歩5分"},
+  {name:"じゅろく なんば別邸", area:"難波", genre:"韓国料理(スンドゥブ)", address:"", hours:"", phone:"", memo:"箕面や梅田で大行列のスンドゥブ専門店が難波に初上陸。日本橋駅徒歩1分、食後に無料シャーベット"},
+  {name:"呑み場ウメダうめだ", area:"淀川区十三", genre:"立ち飲み・スナック風", address:"大阪府大阪市淀川区十三本町1-12-12", hours:"18:00〜24:00(若干前後あり) 不定休", phone:"", memo:"アテ一品平均300円。極トロ鶏レバー、ポテサラなどが名物。オーナーの雰囲気が良いと評判"},
+  {name:"焼肉牛笑 うっしっし", area:"平野区長吉川辺", genre:"焼肉", address:"大阪市平野区長吉川辺3丁目3-18 メルベーユ1階", hours:"17:00〜0:00 定休日不定休", phone:"", memo:"喜連瓜破「湧LABO」の二号店、2025年11月27日オープン。牛タン丸ごと一本焼き100g1,000円"},
+  {name:"寿司屋のだ 大阪駅前第3ビル店", area:"梅田", genre:"寿司", address:"", hours:"", phone:"", memo:"生マグロ8貫1518円、豪華海鮮丼1408円。梅田駅徒歩5分、コスパ抜群で梅田サラリーマンに人気"},
+  {name:"make noodle かしぐ", area:"吹田市江坂町", genre:"ラーメン(鶏白湯)", address:"大阪府吹田市江坂町1-20-30", hours:"", phone:"06-6155-4550", memo:"江坂に半年ほど前から現れ日に日に行列が増えている。鶏白湯とつけ麺が名物"},
+  {name:"和牛焼肉食べ放題 ヤキニクギャング 梅田店", area:"北区曽根崎(梅田)", genre:"焼肉食べ放題", address:"大阪府大阪市北区曽根崎2-10-21 第3河合ビル 1F", hours:"", phone:"", memo:"東梅田駅から134m。スタンダード4,500円〜A5黒毛和牛入り8,000円まで4コース"},
+  {name:"天満天神飯店", area:"北区天神橋(天満)", genre:"創作中華・中華酒場", address:"〒530-0041 大阪府大阪市北区天神橋3丁目3-17 幸陽ビル", hours:"平日18:00〜23:00／休日17:00〜22:00 定休日月曜・水曜", phone:"", memo:"癖強い店主による創作中華。名物は蟹あんかけ炒飯。予算2,000〜3,000円。扇町駅徒歩4分"},
+  {name:"ダテダチ", area:"中央区千日前(日本橋)", genre:"焼き鳥", address:"大阪市中央区千日前2-4-12", hours:"15:00〜23:30(LO23:00) 不定休", phone:"", memo:"いつも満席の人気焼き鳥屋。肝さっと炙り・生つくねが名物。日本橋駅"},
+  {name:"298 梅田3号店", area:"北区堂山町(梅田)", genre:"焼肉食べ放題", address:"大阪府大阪市北区堂山町5-8", hours:"月〜金11:30〜15:00/17:00〜23:00、土日祝11:30〜23:00", phone:"06-6311-3601", memo:"食べ放題コースが1,000円〜4,090円まで4種。和牛カルビ・ハラミなど種類豊富"},
+  {name:"焼肉 力丸 堂山店", area:"北区鶴野町(梅田)", genre:"焼肉食べ放題", address:"大阪府大阪市北区鶴野町1-1 梅田セントラルビル 3F", hours:"17:00〜23:00", phone:"06-6225-7519", memo:"90分食べ放題スタンダード3180円〜和牛4980円。「のびるタン」はインスタ見たと伝えると注文可の限定メニュー"},
+  {name:"小麦の麺神", area:"北区梅田(KITTE大阪)", genre:"ラーメン(鶏白湯・まぜそば)", address:"大阪府大阪市北区梅田3-2-2 KITTE大阪 4F", hours:"11:00〜21:00", phone:"", memo:"大阪ホルモンまぜそば1380円が名物。PayPay可"},
+  {name:"日本酒バル ほのか", area:"北区太融寺町(梅田)", genre:"日本酒バル", address:"大阪市北区太融寺町6-8 阪急産業梅田ビル B1F", hours:"", phone:"", memo:"名物痛風鍋(オープン記念1人1980円、動画は4人前)。平日限定で日本酒39種60分飲み放題480円。梅田駅・大阪駅・東梅田駅"},
+  {name:"キントウン", area:"難波", genre:"町中華(オム炒飯)", address:"", hours:"", phone:"", memo:"オム炒飯968円、焼豚エッグ1089円(卵5個まで無料)。なんば駅徒歩10分"},
+  {name:"すし処 智", area:"中央区東心斎橋", genre:"寿司・手巻き", address:"大阪府大阪市中央区東心斎橋2-3-20-3", hours:"12:00〜22:00(最終入店20:00) 定休日月曜(祝日の場合は翌火曜)", phone:"090-7900-0387", memo:"軍艦・手巻き種類豊富。ご予約・お問い合わせはDMでも可"},
+  {name:"済州島テールスープ専門店", area:"天王寺区勝山", genre:"韓国料理(テールスープ)", address:"大阪市天王寺区勝山1丁目6番4号", hours:"営業日月〜土 11:00〜18:00(平日10:00〜) LO17:30 定休日日曜", phone:"06-6772-7822", memo:"セウジャン丼とミニテールスープセット1,880円〜。桃谷エリアで本場済州島の味"},
+  {name:"洛二神", area:"北区浪花町(天神橋筋六丁目)", genre:"ラーメン(煮干し)", address:"大阪府大阪市北区浪花町4-22 藤ビル 1F", hours:"11:30〜14:30／18:00〜22:00 定休日日曜", phone:"", memo:"極度のニボラー向け「超煮干しそば」が名物、現金のみ。天神橋筋六丁目駅徒歩4分"},
+];
+
+const batch7Data = [
+  {name:"mori", area:"守口市", genre:"ステーキ", address:"", hours:"", phone:"", memo:"京阪電車守口市駅から徒歩8分。300gステーキ+おひつご飯食べ放題、サラダ・スープ付きで税込1380円の激安ステーキランチ。肉は部位により固めの箇所もあるとのこと。@guriru_mori"},
+  {name:"焼肉たまき 京橋店", area:"都島区東野田町(京橋)", genre:"焼肉(生レバー専門)", address:"大阪市都島区東野田町3-10-19 サンピアザビル 1F", hours:"17:00〜翌3:00(投稿により翌5:00表記もあり) 定休日月曜", phone:"06-6948-5229", memo:"「日本一生レバーの聖地」。焼かずに食べられる合法牛の神レバー、海の生レバー(エイの心臓)、馬の生レバー、和牛レバーしゃぶしゃぶなど生レバー種類が豊富。極上ハラミステーキ¥3,800、有馬一樹・有馬正和 各¥3,580、すだち冷麺ハーフ¥780、ヨークルトアイス¥450。支払い:現金・クレジット・バーコード決済。@tamaki.boss.hiro"},
+];
+
+const batch8Data = [
+  {name:"レッドロック アメ村店", area:"心斎橋・アメ村", genre:"ステーキ", address:"大阪府大阪市中央区西心斎橋2-10-21 スパジオビルディング 1F", hours:"月・火・水・木・金・祝前日・祝後日 11:30-15:00(L.O.15:00) 17:00-21:30(L.O.21:00) / 土・日・祝日 11:30-21:30", phone:"06-6214-8119", memo:"ローストビーフ・ステーキが人気のお店。@redrockamemura"},
+];
+
+function uid(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+
+const BATCH2_FLAG_KEY = 'shops-batch2-imported';
+const BATCH3_FLAG_KEY = 'shops-batch3-imported';
+const BATCH4_FLAG_KEY = 'shops-batch4-imported';
+const BATCH5_FLAG_KEY = 'shops-batch5-imported';
+const BATCH6_FLAG_KEY = 'shops-batch6-imported';
+const BATCH7_FLAG_KEY = 'shops-batch7-imported';
+const BATCH8_FLAG_KEY = 'shops-batch8-imported';
+
+async function loadShops(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      shops = JSON.parse(res.value);
+    } else {
+      shops = seedData.map(s => ({...s, id: uid(), visited:false}));
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+    }
+  }catch(e){
+    shops = seedData.map(s => ({...s, id: uid(), visited:false}));
+    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false); }catch(e2){}
+  }
+
+  // batch2(住所付きデータ)を一度だけ追加でマージ
+  try{
+    let alreadyImported = false;
+    try{
+      const flag = await window.storage.get(BATCH2_FLAG_KEY, false);
+      alreadyImported = !!(flag && flag.value === 'true');
+    }catch(e){ alreadyImported = false; }
+
+    if(!alreadyImported){
+      const newOnes = batch2Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH2_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch2のマージに失敗しました', e);
+  }
+
+  // batch3(住所付きデータ第2弾)を一度だけ追加でマージ
+  try{
+    let alreadyImported3 = false;
+    try{
+      const flag3 = await window.storage.get(BATCH3_FLAG_KEY, false);
+      alreadyImported3 = !!(flag3 && flag3.value === 'true');
+    }catch(e){ alreadyImported3 = false; }
+
+    if(!alreadyImported3){
+      const newOnes3 = batch3Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes3, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH3_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch3のマージに失敗しました', e);
+  }
+
+  // batch4(住所付きデータ第3弾)を一度だけ追加でマージ
+  try{
+    let alreadyImported4 = false;
+    try{
+      const flag4 = await window.storage.get(BATCH4_FLAG_KEY, false);
+      alreadyImported4 = !!(flag4 && flag4.value === 'true');
+    }catch(e){ alreadyImported4 = false; }
+
+    if(!alreadyImported4){
+      const newOnes4 = batch4Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes4, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH4_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch4のマージに失敗しました', e);
+  }
+
+  // batch5(住所付きデータ第4弾)を一度だけ追加でマージ
+  try{
+    let alreadyImported5 = false;
+    try{
+      const flag5 = await window.storage.get(BATCH5_FLAG_KEY, false);
+      alreadyImported5 = !!(flag5 && flag5.value === 'true');
+    }catch(e){ alreadyImported5 = false; }
+
+    if(!alreadyImported5){
+      const newOnes5 = batch5Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes5, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH5_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch5のマージに失敗しました', e);
+  }
+
+  // batch6(住所付きデータ第5弾)を一度だけ追加でマージ
+  try{
+    let alreadyImported6 = false;
+    try{
+      const flag6 = await window.storage.get(BATCH6_FLAG_KEY, false);
+      alreadyImported6 = !!(flag6 && flag6.value === 'true');
+    }catch(e){ alreadyImported6 = false; }
+
+    if(!alreadyImported6){
+      const newOnes6 = batch6Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes6, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH6_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch6のマージに失敗しました', e);
+  }
+
+  // batch7(住所付きデータ第6弾)を一度だけ追加でマージ
+  try{
+    let alreadyImported7 = false;
+    try{
+      const flag7 = await window.storage.get(BATCH7_FLAG_KEY, false);
+      alreadyImported7 = !!(flag7 && flag7.value === 'true');
+    }catch(e){ alreadyImported7 = false; }
+
+    if(!alreadyImported7){
+      const newOnes7 = batch7Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes7, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH7_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch7のマージに失敗しました', e);
+  }
+
+  // batch8を一度だけ追加でマージ
+  try{
+    let alreadyImported8 = false;
+    try{
+      const flag8 = await window.storage.get(BATCH8_FLAG_KEY, false);
+      alreadyImported8 = !!(flag8 && flag8.value === 'true');
+    }catch(e){ alreadyImported8 = false; }
+
+    if(!alreadyImported8){
+      const newOnes8 = batch8Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes8, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH8_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch8のマージに失敗しました', e);
+  }
+
+  renderAreaFilter();
+  render();
+}
+
+async function saveShops(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+  }catch(e){
+    console.error('保存に失敗しました', e);
+  }
+}
+
+function renderAreaFilter(){
+  const areas = Array.from(new Set(shops.map(s => s.area).filter(Boolean))).sort();
+  const sel = document.getElementById('areaFilter');
+  sel.innerHTML = '<option value="all">全エリア</option>' +
+    areas.map(a => `<option value="${escapeAttr(a)}">${escapeHtml(a)}</option>`).join('');
+}
+
+function escapeHtml(str){
+  return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+function mapUrl(shop){
+  if(shop.address){
+    return 'https://www.google.com/maps/search/' + encodeURIComponent(shop.address + ' ' + (shop.name||''));
+  }
+  const q = [shop.name, shop.area, '大阪'].filter(Boolean).join(' ');
+  return 'https://www.google.com/maps/search/' + encodeURIComponent(q);
+}
+
+function render(){
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const areaVal = document.getElementById('areaFilter').value;
+  const visitVal = document.getElementById('visitFilter').value;
+
+  let filtered = shops.filter(s => {
+    if(areaVal !== 'all' && s.area !== areaVal) return false;
+    if(visitVal === 'visited' && !s.visited) return false;
+    if(visitVal === 'not' && s.visited) return false;
+    if(search){
+      const hay = [s.name, s.area, s.genre, s.memo, s.address].join(' ').toLowerCase();
+      if(!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('countLabel').textContent = `${filtered.length}件 / 全${shops.length}件`;
+
+  const list = document.getElementById('list');
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">該当するお店がありません。<br>右下の＋から追加できます。</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(s => `
+    <div class="card ${s.visited ? 'visited' : ''}" data-id="${s.id}">
+      <div class="card-top">
+        <div>
+          <div class="name">${escapeHtml(s.name) || '(店名未定)'}</div>
+          <div class="tags">
+            ${s.area ? `<span class="tag area">${escapeHtml(s.area)}</span>` : ''}
+            ${s.genre ? `<span class="tag">${escapeHtml(s.genre)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${s.memo ? `<div class="memo">${escapeHtml(s.memo)}</div>` : ''}
+      ${(s.address || s.hours || s.phone) ? `<div class="meta">
+        ${s.address ? `<span>📍 ${escapeHtml(s.address)}</span>` : ''}
+        ${s.hours ? `<span>🕒 ${escapeHtml(s.hours)}</span>` : ''}
+        ${s.phone ? `<span>☎ ${escapeHtml(s.phone)}</span>` : ''}
+      </div>` : ''}
+      <div class="actions">
+        <a class="map" href="${mapUrl(s)}" target="_blank" rel="noopener">📍 地図で見る</a>
+        <button class="edit-btn">✎ 編集</button>
+        <label class="visited-check">
+          <input type="checkbox" class="visited-toggle" ${s.visited ? 'checked' : ''}>
+          行った
+        </label>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('.card').forEach(card => {
+    const id = card.dataset.id;
+    card.querySelector('.edit-btn').addEventListener('click', () => openSheet(id));
+    card.querySelector('.visited-toggle').addEventListener('change', async (e) => {
+      const shop = shops.find(s => s.id === id);
+      shop.visited = e.target.checked;
+      await saveShops();
+      render();
+    });
+  });
+}
+
+function openSheet(id){
+  editingId = id;
+  const backdrop = document.getElementById('backdrop');
+  const deleteBtn = document.getElementById('deleteBtn');
+  if(id){
+    const shop = shops.find(s => s.id === id);
+    document.getElementById('sheetTitle').textContent = 'お店を編集';
+    document.getElementById('f_name').value = shop.name || '';
+    document.getElementById('f_area').value = shop.area || '';
+    document.getElementById('f_genre').value = shop.genre || '';
+    document.getElementById('f_address').value = shop.address || '';
+    document.getElementById('f_hours').value = shop.hours || '';
+    document.getElementById('f_phone').value = shop.phone || '';
+    document.getElementById('f_memo').value = shop.memo || '';
+    deleteBtn.style.display = 'block';
+  } else {
+    document.getElementById('sheetTitle').textContent = 'お店を追加';
+    document.getElementById('f_name').value = '';
+    document.getElementById('f_area').value = '';
+    document.getElementById('f_genre').value = '';
+    document.getElementById('f_address').value = '';
+    document.getElementById('f_hours').value = '';
+    document.getElementById('f_phone').value = '';
+    document.getElementById('f_memo').value = '';
+    deleteBtn.style.display = 'none';
+  }
+  backdrop.classList.add('open');
+}
+
+function closeSheet(){
+  document.getElementById('backdrop').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('addBtn').addEventListener('click', () => openSheet(null));
+document.getElementById('cancelBtn').addEventListener('click', closeSheet);
+document.getElementById('backdrop').addEventListener('click', (e) => {
+  if(e.target.id === 'backdrop') closeSheet();
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const name = document.getElementById('f_name').value.trim();
+  const area = document.getElementById('f_area').value.trim();
+  const genre = document.getElementById('f_genre').value.trim();
+  const address = document.getElementById('f_address').value.trim();
+  const hours = document.getElementById('f_hours').value.trim();
+  const phone = document.getElementById('f_phone').value.trim();
+  const memo = document.getElementById('f_memo').value.trim();
+
+  if(editingId){
+    const shop = shops.find(s => s.id === editingId);
+    shop.name = name; shop.area = area; shop.genre = genre;
+    shop.address = address; shop.hours = hours; shop.phone = phone; shop.memo = memo;
+  } else {
+    shops.unshift({id: uid(), name, area, genre, address, hours, phone, memo, visited:false});
+  }
+  await saveShops();
+  renderAreaFilter();
+  render();
+  closeSheet();
+});
+
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+  shops = shops.filter(s => s.id !== editingId);
+  await saveShops();
+  renderAreaFilter();
+  render();
+  closeSheet();
+});
+
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('areaFilter').addEventListener('change', render);
+document.getElementById('visitFilter').addEventListener('change', render);
+
+loadShops();
+</script>
+</body>
+</html>
