@@ -472,6 +472,10 @@ const batch8Data = [
   {name:"レッドロック アメ村店", area:"心斎橋・アメ村", genre:"ステーキ", address:"大阪府大阪市中央区西心斎橋2-10-21 スパジオビルディング 1F", hours:"月・火・水・木・金・祝前日・祝後日 11:30-15:00(L.O.15:00) 17:00-21:30(L.O.21:00) / 土・日・祝日 11:30-21:30", phone:"06-6214-8119", memo:"ローストビーフ・ステーキが人気のお店。@redrockamemura"},
 ];
 
+const batch9Data = [
+  {name:"焼肉博則", area:"京町堀", genre:"焼肉", address:"大阪府大阪市西区京町堀1-7-11 アートマスターズ京町堀ビル 1F", hours:"", phone:"", memo:"国産牛の焼肉ランチが1300円。ボリューム満点で肉も柔らかいと評判。限定4食。@dmotoji"},
+];
+
 function uid(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 }
@@ -483,6 +487,7 @@ const BATCH5_FLAG_KEY = 'shops-batch5-imported';
 const BATCH6_FLAG_KEY = 'shops-batch6-imported';
 const BATCH7_FLAG_KEY = 'shops-batch7-imported';
 const BATCH8_FLAG_KEY = 'shops-batch8-imported';
+const BATCH9_FLAG_KEY = 'shops-batch9-imported';
 
 async function loadShops(){
   try{
@@ -622,6 +627,24 @@ async function loadShops(){
     }
   }catch(e){
     console.error('batch8のマージに失敗しました', e);
+  }
+
+  // batch9を一度だけ追加でマージ
+  try{
+    let alreadyImported9 = false;
+    try{
+      const flag9 = await window.storage.get(BATCH9_FLAG_KEY, false);
+      alreadyImported9 = !!(flag9 && flag9.value === 'true');
+    }catch(e){ alreadyImported9 = false; }
+
+    if(!alreadyImported9){
+      const newOnes9 = batch9Data.map(s => ({...s, id: uid(), visited:false}));
+      shops = [...newOnes9, ...shops];
+      await window.storage.set(STORAGE_KEY, JSON.stringify(shops), false);
+      await window.storage.set(BATCH9_FLAG_KEY, 'true', false);
+    }
+  }catch(e){
+    console.error('batch9のマージに失敗しました', e);
   }
 
   renderAreaFilter();
